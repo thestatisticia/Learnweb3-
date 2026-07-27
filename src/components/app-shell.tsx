@@ -8,10 +8,10 @@ import { ChatInterface } from "@/components/chat-interface";
 import { LecturesView } from "@/components/views/lectures-view";
 import { ProfileView } from "@/components/views/profile-view";
 import { LeaderboardView } from "@/components/views/leaderboard-view";
-import { AuthButtons, StartLearningButton } from "@/components/auth-buttons";
 import { NamePromptModal } from "@/components/name-prompt-modal";
 import { ChainSelector } from "@/components/chain-selector";
 import { UserMenu } from "@/components/user-menu";
+import { LandingPage } from "@/components/landing-page";
 import {
   BookIcon,
   ChatIcon,
@@ -83,43 +83,7 @@ function LoadingScreen() {
 }
 
 function SignInScreen() {
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-[#05070d] text-white">
-      <div className="pointer-events-none absolute inset-0 hero-grid" />
-      <div className="pointer-events-none absolute left-1/2 top-[40%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(245,166,35,0.22),transparent_65%)] blur-2xl" />
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-[#05070d] to-transparent" />
-
-      <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        <div className="flex items-center gap-3">
-          <LogoMark />
-          <span className="text-sm font-semibold tracking-wide">LearnWeb3</span>
-        </div>
-        <StartLearningButton className="!px-5 !py-2.5 text-xs">
-          Get started
-        </StartLearningButton>
-      </header>
-
-      <main className="relative z-10 mx-auto flex max-w-6xl flex-col items-center px-6 pb-16 pt-14 text-center md:pt-20">
-        <h1 className="max-w-3xl text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl">
-          LearnWeb3
-        </h1>
-        <p className="mt-3 text-lg text-amber-300/90 sm:text-xl">
-          Learn blockchain by doing, not reading
-        </p>
-        <p className="mt-5 max-w-xl text-base leading-relaxed text-white/60">
-          Chat with an AI mentor, practice real testnet transactions, and earn
-          on-chain XP on Base, Celo, and Stellar.
-        </p>
-
-        <div className="mt-10 w-full max-w-sm">
-          <AuthButtons />
-          <p className="mt-4 text-xs text-white/40">
-            Sign in with email · Testnet only
-          </p>
-        </div>
-      </main>
-    </div>
-  );
+  return <LandingPage />;
 }
 
 function SidePanelBody({

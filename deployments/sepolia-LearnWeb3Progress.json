@@ -1,0 +1,8 @@
+{
+  "network": "ethereum-sepolia",
+  "chainId": 11155111,
+  "address": "0x320448119067d22467be4fb3cd48be02895e5171",
+  "deployer": "0xdbe3fCbE5c8a41882Fb464C7d2cE2DDAf42aFe4B",
+  "txHash": "0x07068f600ef7a711c13dd38b95af74768a0aa959a77a088dc8adf133cb292c0b",
+  "deployedAt": "2026-07-27T17:28:50.893Z"
+}

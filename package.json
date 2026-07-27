@@ -1,0 +1,34 @@
+{
+  "name": "devfest",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "faucet:status": "node scripts/faucet-status.mjs",
+    "faucet:bridge": "node scripts/bridge-sepolia-to-base.mjs",
+    "contract:compile": "node scripts/compile-contract.mjs",
+    "contract:deploy": "node scripts/deploy-progress.mjs"
+  },
+  "dependencies": {
+    "@privy-io/react-auth": "^3.35.2",
+    "@stellar/stellar-sdk": "^16.1.0",
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "viem": "^2.55.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "solc": "^0.8.28",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

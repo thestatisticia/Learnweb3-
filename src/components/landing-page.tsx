@@ -47,39 +47,39 @@ function LogoMark({
 const STEPS = [
   {
     n: "01",
-    title: "Learn",
-    body: "Ask the AI mentor anything — wallets, gas, chains, and security — in plain language.",
+    title: "Ask",
+    body: "The AI mentor explains wallets, gas, NFTs, and DeFi in plain language — then offers your next mission.",
     icon: ChatIcon,
   },
   {
     n: "02",
-    title: "Practice",
-    body: "Complete real testnet missions: fund a wallet, take quizzes, and try guided actions.",
+    title: "Simulate & sign",
+    body: "Practice Mode shows balance before/after and gas. Then you confirm the real transaction in your wallet.",
     icon: TargetIcon,
   },
   {
     n: "03",
-    title: "Earn",
-    body: "Collect on-chain XP, unlock badges, and climb the leaderboard as you progress.",
+    title: "Reflect & earn",
+    body: "The AI explains what your transaction did. XP, badges, and NFT proof land on-chain.",
     icon: TrophyIcon,
   },
 ];
 
 const PATHS = [
   {
-    title: "Beginner",
-    body: "Wallets, transactions, and your first testnet drip.",
-    meta: "4 lessons",
+    title: "Explorer",
+    body: "Fund wallet, register on-chain, send your first test ETH.",
+    meta: "3 wallet confirmations",
+  },
+  {
+    title: "Collector",
+    body: "Mint your Explorer Badge NFT — proof you learned to interact with contracts.",
+    meta: "Mission 4",
   },
   {
     title: "Builder",
-    body: "Chains, security habits, and guided practice missions.",
-    meta: "Coming next",
-  },
-  {
-    title: "DeFi & Beyond",
-    body: "Tokens, contracts, and advanced Web3 workflows.",
-    meta: "Locked path",
+    body: "Quizzes, lectures, and advanced missions as you level up.",
+    meta: "Unlock at Level 3",
   },
 ];
 
@@ -100,10 +100,12 @@ export function LandingPage() {
         <GlassChip icon={<WalletIcon className="h-3.5 w-3.5" />} label="Testnet Mission" />
       </div>
 
-      <header className="relative z-20 mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
-        <div className="flex items-center gap-3">
-          <LogoMark />
-          <span className="text-sm font-semibold tracking-wide">LearnWeb3</span>
+      <header className="relative z-20 mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5">
+        <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+          <LogoMark className="h-7 w-7 shrink-0 sm:h-8 sm:w-8" />
+          <span className="truncate text-sm font-semibold tracking-wide">
+            LearnWeb3
+          </span>
         </div>
         <nav className="hidden items-center gap-6 text-sm text-white/50 md:flex">
           <a href="#how" className="transition hover:text-white">
@@ -116,9 +118,11 @@ export function LandingPage() {
             Mentor
           </a>
         </nav>
-        <div className="flex items-center gap-2">
-          <StartLearningButton variant="ghost">Log in</StartLearningButton>
-          <StartLearningButton className="!px-4 !py-2 text-xs">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="hidden sm:block">
+            <StartLearningButton variant="ghost">Log in</StartLearningButton>
+          </div>
+          <StartLearningButton className="!px-3.5 !py-2 text-xs sm:!px-4">
             Start free
           </StartLearningButton>
         </div>
@@ -126,18 +130,18 @@ export function LandingPage() {
 
       <main className="relative z-10">
         {/* Hero */}
-        <section className="mx-auto max-w-6xl px-6 pb-16 pt-10 text-center md:pt-16">
-          <p className="inline-flex items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-200">
-            <SparklesIcon className="h-3.5 w-3.5" />
-            Your AI mentor for learning Web3
+        <section className="mx-auto max-w-6xl px-4 pb-12 pt-8 text-center sm:px-6 sm:pb-16 sm:pt-10 md:pt-16">
+          <p className="inline-flex max-w-full items-center gap-2 rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-[11px] font-medium text-amber-200 sm:text-xs">
+            <SparklesIcon className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">Consumer AI · Learn Web3 by using Web3</span>
           </p>
-          <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-5xl md:text-6xl">
-            Learn Web3 the way you{" "}
-            <span className="gold-text">actually remember it</span>
+          <h1 className="mx-auto mt-5 max-w-4xl text-[2rem] font-semibold leading-[1.1] tracking-tight text-white sm:mt-6 sm:text-5xl md:text-6xl">
+            The AI that teaches you Web3 by{" "}
+            <span className="gold-text">letting you use Web3</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/55 sm:text-lg">
-            Lessons, quizzes, and an AI mentor that guides you step by step —
-            then you practice with real testnet actions and earn XP as you grow.
+          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-relaxed text-white/55 sm:mt-5 sm:text-lg">
+            Ask a question, get a mission, simulate the transaction, confirm in
+            your wallet — then earn XP and mint proof on testnet.
           </p>
 
           <div className="mx-auto mt-8 flex w-full max-w-md flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:justify-center">
@@ -155,7 +159,7 @@ export function LandingPage() {
             Email signup · No seed phrases on day one · Testnet only
           </p>
 
-          {/* Product preview */}
+          {/* Product preview — conversation mock */}
           <div id="preview" className="mx-auto mt-14 max-w-4xl scroll-mt-24">
             <div className="rounded-[28px] border border-white/10 bg-[#0b1020]/80 p-3 shadow-[0_0_80px_rgba(245,166,35,0.08)] backdrop-blur-xl sm:p-4">
               <div className="overflow-hidden rounded-[22px] border border-white/8 bg-[#070b16]">
@@ -172,32 +176,70 @@ export function LandingPage() {
                     </div>
                   </div>
                   <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-left">
-                    <p className="text-[10px] text-amber-300">Level 3</p>
-                    <div className="mt-1 h-1 w-20 overflow-hidden rounded-full bg-white/10">
-                      <div className="h-full w-[70%] rounded-full bg-gradient-to-r from-amber-500 to-orange-500" />
-                    </div>
+                    <p className="text-[10px] text-amber-300">Mission 4</p>
+                    <p className="text-[11px] font-medium text-white/80">
+                      Mint Explorer Badge
+                    </p>
                   </div>
                 </div>
 
-                <div className="grid gap-4 p-4 text-left sm:grid-cols-[1.2fr_0.8fr] sm:p-5">
-                  <div className="space-y-3">
-                    <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 text-sm font-medium text-black">
-                      Explain Ethereum gas fees
-                    </div>
-                    <div className="max-w-[92%] rounded-2xl rounded-bl-md border border-white/10 bg-[#12182b] px-4 py-3 text-sm leading-relaxed text-white/75">
-                      Gas is the fee paid to process your transaction — like
-                      postage. Busier networks cost more. On LearnWeb3 testnets,
-                      you practice with free tokens.
-                    </div>
-                    <div className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/30">
-                      Ask anything about Web3...
-                    </div>
+                <div className="space-y-3 p-4 text-left sm:p-5">
+                  <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 text-sm font-medium text-black">
+                    How do NFTs work?
                   </div>
 
-                  <div className="space-y-3">
-                    <StatCard label="XP" value="420" />
-                    <StatCard label="Missions" value="12 done" />
-                    <StatCard label="Badge" value="Explorer" />
+                  <div className="max-w-[92%] rounded-2xl rounded-bl-md border border-white/10 bg-[#12182b] px-4 py-3 text-sm leading-relaxed text-white/75">
+                    NFTs prove ownership of a unique digital asset on-chain.
+                    Want to mint your first one?
+                    <span className="mt-2 block rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-2 text-center text-xs font-semibold text-black">
+                      Mint My First NFT
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-[#0a0f1a] px-4 py-3">
+                    <p className="text-[10px] font-medium uppercase tracking-wide text-white/35">
+                      Practice mode
+                    </p>
+                    <div className="mt-2 grid gap-1.5 text-xs">
+                      <PreviewRow label="Balance before" value="0.0500 ETH" />
+                      <PreviewRow label="Balance after" value="0.0498 ETH" />
+                      <PreviewRow label="Est. gas" value="≈0.00002 ETH" />
+                    </div>
+                    <p className="mt-2 text-[11px] text-white/40">
+                      Nothing has happened yet — ready for the real transaction?
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-violet-500/25 bg-violet-500/5 px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <WalletIcon className="h-4 w-4 text-violet-300" />
+                      <p className="text-sm font-semibold text-white">
+                        Confirm in wallet
+                      </p>
+                    </div>
+                    <p className="mt-1 text-xs text-white/45">
+                      Base Sepolia · Mint Explorer Badge
+                    </p>
+                    <span className="mt-2 block rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-2 text-center text-xs font-semibold text-violet-200">
+                      Approve
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/5 px-4 py-3">
+                    <p className="text-xs font-semibold text-emerald-400">
+                      Explorer Badge minted!
+                    </p>
+                    <p className="mt-1 text-sm text-white/70">
+                      You signed your first NFT mint. +150 XP unlocked.
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-medium text-emerald-300">
+                        +150 XP
+                      </span>
+                      <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-medium text-amber-300">
+                        NFT Explorer badge
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -206,14 +248,14 @@ export function LandingPage() {
         </section>
 
         {/* How it works */}
-        <section id="how" className="mx-auto max-w-6xl scroll-mt-24 px-6 py-14">
+        <section id="how" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-12 sm:px-6 sm:py-14">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight text-white">
+            <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
               How it works
             </h2>
             <p className="mt-3 text-white/50">
-              A simple loop: learn with AI, practice on-chain, earn progress you
-              can prove.
+              Question → AI explains → mission → simulate → wallet confirm →
+              reflect → XP + NFT.
             </p>
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
@@ -245,14 +287,14 @@ export function LandingPage() {
         </section>
 
         {/* Paths */}
-        <section id="paths" className="mx-auto max-w-6xl scroll-mt-24 px-6 py-14">
+        <section id="paths" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-12 sm:px-6 sm:py-14">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight text-white">
-              Learning paths
+            <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+              Mission paths
             </h2>
             <p className="mt-3 text-white/50">
-              Start with foundations. Unlock builder and DeFi tracks as you
-              level up.
+              Every path ends with something happening on-chain — with your
+              wallet signature.
             </p>
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
@@ -277,14 +319,14 @@ export function LandingPage() {
         </section>
 
         {/* Final CTA */}
-        <section className="mx-auto max-w-6xl px-6 py-16">
-          <div className="rounded-[32px] border border-amber-500/25 bg-gradient-to-br from-amber-500/15 via-[#0b1020] to-[#05070d] px-6 py-12 text-center sm:px-10">
-            <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              Become a Web3 builder — one mission at a time
+        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+          <div className="rounded-[28px] border border-amber-500/25 bg-gradient-to-br from-amber-500/15 via-[#0b1020] to-[#05070d] px-5 py-10 text-center sm:rounded-[32px] sm:px-10 sm:py-12">
+            <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl md:text-4xl">
+              Your AI-native Web3 assistant starts here
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-white/55">
-              Built for beginners, students, and developers who want practice,
-              not another wall of docs.
+              Sign in with email, get an embedded wallet, and complete your
+              first mission in minutes — simulate first, sign when ready.
             </p>
             <div className="mx-auto mt-8 w-full max-w-sm">
               <AuthButtons />
@@ -296,7 +338,7 @@ export function LandingPage() {
         </section>
       </main>
 
-      <footer className="relative z-10 border-t border-white/8 px-6 py-8">
+      <footer className="relative z-10 border-t border-white/8 px-4 py-8 sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-sm text-white/35 sm:flex-row">
           <div className="flex items-center gap-2 text-white/60">
             <LogoMark className="h-6 w-6" gradId="lw3-footer" />
@@ -305,6 +347,15 @@ export function LandingPage() {
           <p>Learn · Practice · Earn · Testnet only</p>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function PreviewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-white/40">{label}</span>
+      <span className="font-medium text-white/75">{value}</span>
     </div>
   );
 }
@@ -324,11 +375,3 @@ function GlassChip({
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3">
-      <p className="text-[11px] uppercase tracking-wide text-white/35">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-white">{value}</p>
-    </div>
-  );
-}

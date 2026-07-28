@@ -1,0 +1,134 @@
+{
+  "contractName": "LearnTokenSwap",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "ethIn",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "learnOut",
+          "type": "uint256"
+        }
+      ],
+      "name": "Swapped",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "RATE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "spentByUser",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "swapExactInput",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "learnOut",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600e575f5ffd5b506103428061001c5f395ff3fe60806040526004361061006e575f3560e01c8063664e97041161004c578063664e97041461011c57806370a082311461013157806395d89b411461015c578063e3c429cb1461018c575f5ffd5b806306fdde0314610072578063313ce567146100bd57806351cf0c1b146100e3575b5f5ffd5b34801561007d575f5ffd5b506100a76040518060400160405280600a8152602001692632b0b9372a37b5b2b760b11b81525081565b6040516100b49190610266565b60405180910390f35b3480156100c8575f5ffd5b506100d1601281565b60405160ff90911681526020016100b4565b3480156100ee575f5ffd5b5061010e6100fd36600461029b565b60016020525f908152604090205481565b6040519081526020016100b4565b348015610127575f5ffd5b5061010e61271081565b34801561013c575f5ffd5b5061010e61014b36600461029b565b5f6020819052908152604090205481565b348015610167575f5ffd5b506100a7604051806040016040528060058152602001642622a0a92760d91b81525081565b61010e5f5f34116101d15760405162461bcd60e51b815260206004820152600b60248201526a1b9bc8195d1a081cd95b9d60aa1b604482015260640160405180910390fd5b6101dd612710346102dc565b335f908152602081905260408120805492935083929091906102009084906102f9565b9091555050335f90815260016020526040812080543492906102239084906102f9565b9091555050604080513481526020810183905233917f3a9a9f34f5831e9c8ecb66ab3aa308b2ff31eaca434615f6c9cadc656a9af71c910160405180910390a290565b602081525f82518060208401528060208501604085015e5f604082850101526040601f19601f83011684010191505092915050565b5f602082840312156102ab575f5ffd5b81356001600160a01b03811681146102c1575f5ffd5b9392505050565b634e487b7160e01b5f52601160045260245ffd5b80820281158282048414176102f3576102f36102c8565b92915050565b808201808211156102f3576102f36102c856fea2646970667358221220f7e3016de4a454ab037328cc9f7fd991a4589084f454ca0f71fa4a7869749fbc64736f6c634300081c0033"
+}

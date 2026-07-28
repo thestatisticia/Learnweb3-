@@ -49,6 +49,12 @@ const BADGE_LIST = [
     action: "Pass quiz",
     icon: TrophyIcon,
   },
+  {
+    key: "nftExplorer",
+    label: "NFT Explorer",
+    action: "Mint badge",
+    icon: SparklesIcon,
+  },
 ] as const;
 
 export function ProfileView() {
@@ -112,18 +118,25 @@ export function ProfileView() {
         xp: "+75 XP",
       });
     }
+    if (profile?.actions.send) {
+      items.push({
+        title: "Sent test ETH",
+        detail: "Wallet-signed transfer",
+        xp: "+100 XP",
+      });
+    }
+    if (profile?.actions.mint) {
+      items.push({
+        title: "Minted Explorer Badge",
+        detail: "Wallet-signed NFT mint",
+        xp: "+150 XP",
+      });
+    }
     if (profile?.actions.lesson) {
       items.push({
         title: "Completed a lesson",
         detail: "Lesson action recorded",
         xp: "+75 XP",
-      });
-    }
-    if (profile?.actions.send) {
-      items.push({
-        title: "Sent tokens",
-        detail: "Payment practice",
-        xp: "+100 XP",
       });
     }
     for (const lecture of LECTURES) {
@@ -231,19 +244,19 @@ export function ProfileView() {
           <label className="text-xs font-medium text-white/45">
             Display name (on-chain)
           </label>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
             <input
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               maxLength={32}
               placeholder="Choose a name"
-              className="flex-1 rounded-full border border-white/10 bg-[#05070d] px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-amber-500/40 focus:outline-none"
+              className="w-full flex-1 rounded-full border border-white/10 bg-[#05070d] px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-amber-500/40 focus:outline-none"
             />
             <button
               type="button"
               onClick={() => void saveName()}
               disabled={saving || !displayName.trim()}
-              className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-semibold text-black hover:from-amber-400 hover:to-orange-400 disabled:opacity-40"
+              className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-semibold text-black hover:from-amber-400 hover:to-orange-400 disabled:opacity-40 sm:shrink-0"
             >
               {saving ? "Saving…" : "Save"}
             </button>
@@ -280,7 +293,7 @@ export function ProfileView() {
             {copied ? "Copied" : "Copy"}
           </button>
           <a
-            href={`https://sepolia.etherscan.io/address/${address}`}
+            href={`https://sepolia.basescan.org/address/${address}`}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-medium text-white/70 transition hover:border-amber-500/30 hover:text-amber-200"

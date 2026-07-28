@@ -1,7 +1,7 @@
 "use client";
 
 import { PrivyProvider } from "@privy-io/react-auth";
-import { baseSepolia, celoSepolia } from "@/lib/chains";
+import { baseSepolia, celoSepolia, ethereumSepolia } from "@/lib/chains";
 
 const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 
@@ -41,7 +41,7 @@ export function AppPrivyProvider({ children }: { children: React.ReactNode }) {
           },
         },
         defaultChain: baseSepolia,
-        supportedChains: [baseSepolia, celoSepolia],
+        supportedChains: [ethereumSepolia, baseSepolia, celoSepolia],
       }}
     >
       {children}

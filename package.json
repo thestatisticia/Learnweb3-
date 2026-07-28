@@ -10,7 +10,9 @@
     "faucet:status": "node scripts/faucet-status.mjs",
     "faucet:bridge": "node scripts/bridge-sepolia-to-base.mjs",
     "contract:compile": "node scripts/compile-contract.mjs",
-    "contract:deploy": "node scripts/deploy-progress.mjs"
+    "contract:deploy": "node scripts/deploy-progress.mjs",
+    "contract:deploy-badge": "node scripts/deploy-badge.mjs",
+    "contract:deploy-swap": "node scripts/deploy-swap.mjs"
   },
   "dependencies": {
     "@privy-io/react-auth": "^3.35.2",

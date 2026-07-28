@@ -123,14 +123,14 @@ export function LeaderboardView() {
         <p className="text-center text-xs text-slate-500">
           Contract{" "}
           <a
-            href={`https://sepolia.etherscan.io/address/${contract}`}
+            href={`https://sepolia.basescan.org/address/${contract}`}
             target="_blank"
             rel="noreferrer"
             className="text-amber-400 underline"
           >
             {shortenAddress(contract, 6)}
           </a>{" "}
-          · Ethereum Sepolia
+          · Base Sepolia
         </p>
       )}
     </div>

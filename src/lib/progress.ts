@@ -2,31 +2,24 @@ import {
   createPublicClient,
   createWalletClient,
   http,
-  defineChain,
   type Address,
   type Hex,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import { baseSepolia } from "@/lib/chains";
 import progressAbiJson from "@/lib/abi/LearnWeb3Progress.json";
 
-export const ethereumSepolia = defineChain({
-  id: 11155111,
-  name: "Ethereum Sepolia",
-  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-  rpcUrls: {
-    default: { http: ["https://ethereum-sepolia-rpc.publicnode.com"] },
-  },
-  blockExplorers: {
-    default: { name: "Etherscan", url: "https://sepolia.etherscan.io" },
-  },
-  testnet: true,
-});
+export const progressChain = baseSepolia;
+
+const progressExplorer =
+  baseSepolia.blockExplorers?.default.url ?? "https://sepolia.basescan.org";
 
 export const PROGRESS_ACTIONS = {
   FUND: 1,
   SEND: 2,
   LESSON: 3,
   QUIZ: 4,
+  MINT: 5,
 } as const;
 
 export type ProgressActionId =
@@ -40,6 +33,7 @@ export const ACTION_META: Record<
   2: { label: "Send tokens", xp: 100, badge: "Payment Pro" },
   3: { label: "Complete lesson", xp: 75, badge: "Web3 Beginner" },
   4: { label: "Pass quiz", xp: 75, badge: "Quiz Master" },
+  5: { label: "Mint NFT badge", xp: 150, badge: "NFT Explorer" },
 };
 
 export const progressAbi = progressAbiJson.abi;
@@ -54,7 +48,7 @@ export function getProgressContractAddress(): Address {
 
 export function getProgressPublicClient() {
   return createPublicClient({
-    chain: ethereumSepolia,
+    chain: baseSepolia,
     transport: http(),
   });
 }
@@ -70,12 +64,14 @@ export type OnChainProfile = {
     send: boolean;
     lesson: boolean;
     quiz: boolean;
+    mint: boolean;
   };
   badges: {
     walletExplorer: boolean;
     paymentPro: boolean;
     web3Beginner: boolean;
     quizMaster: boolean;
+    nftExplorer: boolean;
   };
   level: number;
   explorerUrl: string;
@@ -89,8 +85,61 @@ export async function readProfile(user: Address): Promise<OnChainProfile> {
   const client = getProgressPublicClient();
   const address = getProgressContractAddress();
 
+  try {
+    const result = await client.readContract({
+      address,
+      abi: progressAbi,
+      functionName: "getProfile",
+      args: [user],
+    });
+
+    const [xp, actionsCompleted, displayName, registered, actionStatus, badgeStatus] =
+      result as [
+        bigint,
+        bigint,
+        string,
+        boolean,
+        readonly boolean[],
+        readonly boolean[],
+      ];
+
+    const xpNum = Number(xp);
+
+    return {
+      address: user,
+      xp: xpNum,
+      actionsCompleted: Number(actionsCompleted),
+      displayName: displayName || "",
+      registered,
+      actions: {
+        fund: actionStatus[0] ?? false,
+        send: actionStatus[1] ?? false,
+        lesson: actionStatus[2] ?? false,
+        quiz: actionStatus[3] ?? false,
+        mint: actionStatus[4] ?? false,
+      },
+      badges: {
+        walletExplorer: badgeStatus[0] ?? false,
+        paymentPro: badgeStatus[1] ?? false,
+        web3Beginner: badgeStatus[2] ?? false,
+        quizMaster: badgeStatus[3] ?? false,
+        nftExplorer: badgeStatus[4] ?? false,
+      },
+      level: xpToLevel(xpNum),
+      explorerUrl: `${progressExplorer}/address/${address}`,
+    };
+  } catch {
+    return readProfileLegacy(client, address, user);
+  }
+}
+
+async function readProfileLegacy(
+  client: ReturnType<typeof getProgressPublicClient>,
+  contract: Address,
+  user: Address,
+): Promise<OnChainProfile> {
   const result = await client.readContract({
-    address,
+    address: contract,
     abi: progressAbi,
     functionName: "getProfile",
     args: [user],
@@ -119,15 +168,17 @@ export async function readProfile(user: Address): Promise<OnChainProfile> {
       send: actionStatus[1],
       lesson: actionStatus[2],
       quiz: actionStatus[3],
+      mint: false,
     },
     badges: {
       walletExplorer: badgeStatus[0],
       paymentPro: badgeStatus[1],
       web3Beginner: badgeStatus[2],
       quizMaster: badgeStatus[3],
+      nftExplorer: false,
     },
     level: xpToLevel(xpNum),
-    explorerUrl: `https://sepolia.etherscan.io/address/${address}`,
+    explorerUrl: `${progressExplorer}/address/${contract}`,
   };
 }
 
@@ -184,7 +235,7 @@ export async function awardActionOnChain(
   const publicClient = getProgressPublicClient();
   const walletClient = createWalletClient({
     account,
-    chain: ethereumSepolia,
+    chain: baseSepolia,
     transport: http(),
   });
   const contract = getProgressContractAddress();
@@ -216,7 +267,7 @@ export async function awardActionOnChain(
 
   return {
     transactionHash: hash,
-    explorerUrl: `https://sepolia.etherscan.io/tx/${hash}`,
+    explorerUrl: `${progressExplorer}/tx/${hash}`,
     xpEarned: meta.xp,
     badge: meta.badge,
     profile,

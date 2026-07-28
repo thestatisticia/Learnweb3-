@@ -40,12 +40,12 @@ export function UserMenu({ displayName, email }: UserMenuProps) {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="inline-flex max-w-[160px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm font-medium text-white/85 transition hover:bg-white/[0.07] sm:max-w-[200px]"
+        className="inline-flex max-w-[120px] items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-sm font-medium text-white/85 transition hover:bg-white/[0.07] sm:max-w-[200px] sm:px-3"
       >
         <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-[10px] font-semibold text-amber-300">
           {label[0]?.toUpperCase() ?? "U"}
         </span>
-        <span className="truncate">{label}</span>
+        <span className="hidden truncate min-[380px]:inline">{label}</span>
         <svg
           className={`h-3.5 w-3.5 shrink-0 text-white/40 transition ${open ? "rotate-180" : ""}`}
           viewBox="0 0 20 20"

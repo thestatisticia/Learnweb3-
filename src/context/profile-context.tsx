@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { useMultichainWallets } from "@/hooks/use-multichain-wallets";
+import { parseApiJson } from "@/lib/parse-api-json";
 import type { OnChainProfile } from "@/lib/progress";
 
 type ProfileContextValue = {
@@ -45,7 +46,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setError(null);
     try {
       const res = await fetch(`/api/progress/profile?address=${address}`);
-      const data = await res.json();
+      const data = await parseApiJson<{ error?: string } & OnChainProfile>(res);
       if (!res.ok) throw new Error(data.error ?? "Failed to load profile");
       setProfile(data as OnChainProfile);
     } catch (err) {
@@ -70,10 +71,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address, displayName: trimmed }),
       });
-      const data = await res.json();
+      const data = await parseApiJson<{ error?: string; explorerUrl?: string }>(
+        res,
+      );
       if (!res.ok) throw new Error(data.error ?? "Could not save name");
       await refresh();
-      return { explorerUrl: data.explorerUrl as string | undefined };
+      return { explorerUrl: data.explorerUrl };
     },
     [address, refresh],
   );

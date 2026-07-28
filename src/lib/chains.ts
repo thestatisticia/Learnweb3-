@@ -2,6 +2,19 @@ import { defineChain, type Chain } from "viem";
 
 export type AppChainId = "base" | "celo" | "stellar";
 
+export const ethereumSepolia = defineChain({
+  id: 11155111,
+  name: "Ethereum Sepolia",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://ethereum-sepolia-rpc.publicnode.com"] },
+  },
+  blockExplorers: {
+    default: { name: "Etherscan", url: "https://sepolia.etherscan.io" },
+  },
+  testnet: true,
+});
+
 export const baseSepolia = defineChain({
   id: 84532,
   name: "Base Sepolia",
@@ -71,7 +84,7 @@ export const APP_CHAINS: Record<
   },
 };
 
-export const EVM_CHAINS = [baseSepolia, celoSepolia] as const;
+export const EVM_CHAINS = [ethereumSepolia, baseSepolia, celoSepolia] as const;
 
 export function getEvmChain(chainId: AppChainId): Chain | undefined {
   return APP_CHAINS[chainId].evmChain;

@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
+import { baseSepolia } from "@/lib/chains";
 import {
   getProgressContractAddress,
   getProgressPublicClient,
   progressAbi,
+  progressChain,
 } from "@/lib/progress";
 import { createWalletClient, http, type Address, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { ethereumSepolia } from "@/lib/progress";
+
+const progressExplorer =
+  progressChain.blockExplorers?.default.url ?? "https://sepolia.basescan.org";
 
 export async function POST(request: Request) {
   try {
@@ -31,7 +35,7 @@ export async function POST(request: Request) {
     const account = privateKeyToAccount(key as Hex);
     const walletClient = createWalletClient({
       account,
-      chain: ethereumSepolia,
+      chain: baseSepolia,
       transport: http(),
     });
     const publicClient = getProgressPublicClient();
@@ -49,7 +53,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       message: "Display name saved on-chain",
       transactionHash: hash,
-      explorerUrl: `https://sepolia.etherscan.io/tx/${hash}`,
+      explorerUrl: `${progressExplorer}/tx/${hash}`,
     });
   } catch (error) {
     const message =

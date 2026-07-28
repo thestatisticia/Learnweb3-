@@ -1,0 +1,121 @@
+{
+  "contractName": "LearnWeb3Badge",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "hasMinted",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ownerOf",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405260015f553480156012575f5ffd5b5061039c806100205f395ff3fe608060405234801561000f575f5ffd5b5060043610610060575f3560e01c806306fdde03146100645780631249c58b146100ab57806338e21cce146100b55780636352211e146100e757806370a082311461011257806395d89b4114610148575b5f5ffd5b610095604051806040016040528060128152602001712632b0b9372bb2b1199022bc383637b932b960711b81525081565b6040516100a291906102c9565b60405180910390f35b6100b361016b565b005b6100d76100c33660046102fe565b60036020525f908152604090205460ff1681565b60405190151581526020016100a2565b6100fa6100f536600461032b565b61025b565b6040516001600160a01b0390911681526020016100a2565b61013a6101203660046102fe565b6001600160a01b03165f9081526002602052604090205490565b6040519081526020016100a2565b610095604051806040016040528060048152602001634c57334560e01b81525081565b335f9081526003602052604090205460ff16156101c05760405162461bcd60e51b815260206004820152600e60248201526d185b1c9958591e481b5a5b9d195960921b60448201526064015b60405180910390fd5b335f908152600360205260408120805460ff19166001179055805481806101e683610342565b909155505f81815260016020908152604080832080546001600160a01b0319163390811790915583526002909152812080549293509061022583610342565b9091555050604051819033905f907fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef908290a450565b5f818152600160205260408120546001600160a01b03166102ae5760405162461bcd60e51b815260206004820152600d60248201526c34b73b30b634b2103a37b5b2b760991b60448201526064016101b7565b505f908152600160205260409020546001600160a01b031690565b602081525f82518060208401528060208501604085015e5f604082850101526040601f19601f83011684010191505092915050565b5f6020828403121561030e575f5ffd5b81356001600160a01b0381168114610324575f5ffd5b9392505050565b5f6020828403121561033b575f5ffd5b5035919050565b5f6001820161035f57634e487b7160e01b5f52601160045260245ffd5b506001019056fea26469706673582212207a73d4223a7fd6906576dc567f7907a2ee872106b7c5c766007605e88e47021e64736f6c634300081c0033"
+}

@@ -10,6 +10,23 @@ import { getStellarBalance } from "@/lib/stellar";
 import { shortenAddress } from "@/lib/wallets";
 import { getLecture, PASS_SCORE, type Lecture } from "@/lib/lectures";
 import { useProfile } from "@/context/profile-context";
+import type { ChatMessage, MessageAction } from "@/lib/chat-types";
+import {
+  getNextMission,
+  getProactiveGreeting,
+  MISSIONS,
+  SWAP_RECEIVE_LEARN,
+  type Mission,
+} from "@/lib/missions";
+import { checkHasMinted, checkHasSwapped } from "@/lib/wallet-actions";
+import { baseSepolia } from "@/lib/chains";
+import { createPublicClient, http } from "viem";
+import { useEvmWalletClient } from "@/hooks/use-evm-wallet-client";
+import { useChatWalletActions } from "@/hooks/use-chat-wallet-actions";
+import {
+  MissionActionCard,
+  TxReflectionCard,
+} from "@/components/mission-action-card";
 import {
   ArrowUpIcon,
   BoltIcon,
@@ -17,22 +34,6 @@ import {
   TargetIcon,
   WalletIcon,
 } from "@/components/icons";
-
-type MessageAction = {
-  type: "fund" | "balance" | "quiz";
-  chain?: AppChainId;
-  status: "ready" | "loading" | "success" | "error";
-  result?: string;
-  quizOptions?: string[];
-  quizQuestionIndex?: number;
-};
-
-export type ChatMessage = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  action?: MessageAction;
-};
 
 type QuizSession = {
   lecture: Lecture;
@@ -47,28 +48,34 @@ const SUGGESTION_CARDS: {
   icon: typeof WalletIcon;
 }[] = [
   {
+    prompt: "Start my next mission",
+    title: "Next mission",
+    description: "AI-guided on-chain practice",
+    icon: TargetIcon,
+  },
+  {
     prompt: "What is a crypto wallet?",
     title: "What is a wallet?",
     description: "Learn the basics",
     icon: WalletIcon,
   },
   {
-    prompt: "Fund my wallet",
-    title: "Fund my wallet",
-    description: "Receive testnet tokens",
+    prompt: "Send test ETH",
+    title: "Send test ETH",
+    description: "Wallet confirmation · +100 XP",
     icon: BoltIcon,
   },
   {
-    prompt: "Quiz me on wallets",
-    title: "Quiz me",
-    description: "5 questions · earn XP",
-    icon: TargetIcon,
+    prompt: "Mint my explorer badge",
+    title: "Mint NFT badge",
+    description: "Wallet confirmation · +150 XP",
+    icon: SparklesIcon,
   },
   {
-    prompt: "Explain gas fees",
-    title: "Gas fees",
-    description: "Understand transactions",
-    icon: SparklesIcon,
+    prompt: "Swap ETH for LEARN",
+    title: "Swap tokens",
+    description: `Wallet confirmation · receive ${SWAP_RECEIVE_LEARN} LEARN`,
+    icon: BoltIcon,
   },
 ];
 
@@ -93,11 +100,15 @@ export function ChatInterface({
     evmWallet,
   } = useMultichainWallets();
   const { profile, refresh: refreshProfile } = useProfile();
+  const { address: walletAddress } = useEvmWalletClient();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
+  const [hasMintedNft, setHasMintedNft] = useState(false);
+  const [hasSwapped, setHasSwapped] = useState(false);
+  const [missionBootstrapped, setMissionBootstrapped] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const consumedPrompt = useRef<string | null>(null);
   const hasStarted = messages.length > 0;
@@ -122,8 +133,75 @@ export function ChatInterface({
     ]);
   }, []);
 
+  const updateMessage = useCallback(
+    (messageId: string, updater: (msg: ChatMessage) => ChatMessage) => {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? updater(m) : m)),
+      );
+    },
+    [],
+  );
+
+  const onReflection = useCallback(
+    (_whatHappened: string, xpMessage?: string) => {
+      if (xpMessage) addAssistant(xpMessage);
+    },
+    [addAssistant],
+  );
+
+  const { loadPreview, advanceToConfirm, confirmWalletAction } =
+    useChatWalletActions(updateMessage, onReflection, refreshProfile);
+
+  const offerMission = useCallback(
+    (mission: Mission, registerName?: string) => {
+      const id = crypto.randomUUID();
+      const content = `**${mission.title}** · ${mission.tier}\n\n${mission.explain}`;
+
+      if (mission.action === "fund") {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id,
+            role: "assistant",
+            content: `${content}\n\nClick below to receive testnet tokens (+${mission.xpReward} XP).`,
+            action: { type: "fund", chain: "base", status: "ready" },
+          },
+        ]);
+        return;
+      }
+
+      const walletAction =
+        mission.action === "register"
+          ? "register"
+          : mission.action === "send"
+            ? "send"
+            : mission.action === "swap"
+              ? "swap"
+              : "mint";
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id,
+          role: "assistant",
+          content: `${content}\n\nI'll show a **practice preview** first, then you'll **confirm in your wallet**.`,
+          action: {
+            type: "wallet",
+            walletAction,
+            registerName,
+            phase: "simulate",
+            status: "ready",
+          },
+        },
+      ]);
+
+      void loadPreview(id, walletAction, registerName);
+    },
+    [loadPreview],
+  );
+
   const awardXp = useCallback(
-    async (action: "fund" | "send" | "lesson" | "quiz") => {
+    async (action: "fund" | "send" | "lesson" | "quiz" | "mint") => {
       const address = evmWallet?.address;
       if (!address) return null;
 
@@ -219,7 +297,7 @@ export function ChatInterface({
         }
 
         const explorerLine = data.explorerUrl
-          ? `\n\nTx: ${data.explorerUrl}`
+          ? "\n\nExplorer link saved in your activity."
           : "";
 
         // Prefer confirmed balance from faucet (waits for receipt). Fall back to a fresh read.
@@ -254,7 +332,7 @@ export function ChatInterface({
         if (xp && "xpEarned" in xp) {
           await refreshProfile();
           addAssistant(
-            `**+${xp.xpEarned} XP** earned on-chain!\nBadge unlocked: **${xp.badge}**\nLevel **${xp.profile.level}** · Total XP **${xp.profile.xp}**\n\nProgress tx: ${xp.explorerUrl}\n\nOpen **Profile** or **Leaderboard** to see your rank.`,
+            `**+${xp.xpEarned} XP** earned on-chain!\nBadge unlocked: **${xp.badge}**\nLevel **${xp.profile.level}** · Total XP **${xp.profile.xp}**\n\nOpen **Profile** or **Leaderboard** to see your rank.`,
           );
         } else if (xp && "alreadyCompleted" in xp) {
           addAssistant(
@@ -300,10 +378,35 @@ export function ChatInterface({
 
       switch (intent) {
         case "GREETING":
-          addAssistant(
-            "Hey! Ready to learn Web3? Fund your wallet for **+50 XP**, then check **Profile** and the **Leaderboard**.\n\nWhat would you like to do first?",
-          );
+        case "MISSION": {
+          const mission = getNextMission(profile, hasMintedNft, hasSwapped);
+          if (mission) {
+            addAssistant(
+              getProactiveGreeting(profile, hasMintedNft, hasSwapped, displayName),
+            );
+            offerMission(mission, displayName ?? profile?.displayName ?? undefined);
+          } else {
+            addAssistant(
+              getProactiveGreeting(profile, hasMintedNft, hasSwapped, displayName),
+            );
+          }
           return;
+        }
+
+        case "SWAP": {
+          offerMission(MISSIONS.swap);
+          return;
+        }
+
+        case "SEND": {
+          offerMission(MISSIONS.send);
+          return;
+        }
+
+        case "MINT": {
+          offerMission(MISSIONS.mint);
+          return;
+        }
 
         case "FUND": {
           const id = crypto.randomUUID();
@@ -382,7 +485,7 @@ export function ChatInterface({
             setIsThinking(false);
             if (xp && "xpEarned" in xp) {
               addAssistant(
-                `Lesson complete! **+${xp.xpEarned} XP** · Badge: **${xp.badge}**\nLevel **${xp.profile.level}** · Total **${xp.profile.xp} XP**\n\n${xp.explorerUrl}`,
+                `Lesson complete! **+${xp.xpEarned} XP** · Badge: **${xp.badge}**\nLevel **${xp.profile.level}** · Total **${xp.profile.xp} XP**`,
               );
             } else if (xp && "alreadyCompleted" in xp) {
               addAssistant("You already claimed the lesson XP. Nice work!");
@@ -421,8 +524,13 @@ export function ChatInterface({
     [
       addAssistant,
       awardXp,
+      displayName,
       fetchBalance,
+      hasMintedNft,
+      hasSwapped,
       messages,
+      offerMission,
+      profile,
       selectedChain,
       setSelectedChain,
     ],
@@ -476,7 +584,7 @@ export function ChatInterface({
           if (xp && "xpEarned" in xp) {
             await refreshProfile();
             addAssistant(
-              `**+${xp.xpEarned} XP** · Badge: **${xp.badge}**\n${xp.explorerUrl}`,
+              `**+${xp.xpEarned} XP** · Badge: **${xp.badge}**`,
             );
           } else if (xp && "alreadyCompleted" in xp) {
             addAssistant("Quiz XP was already claimed earlier.");
@@ -515,32 +623,80 @@ export function ChatInterface({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialPrompt]);
 
+  useEffect(() => {
+    if (!walletAddress || !process.env.NEXT_PUBLIC_BADGE_CONTRACT) return;
+    const client = createPublicClient({
+      chain: baseSepolia,
+      transport: http(),
+    });
+    void checkHasMinted(client, walletAddress).then(setHasMintedNft);
+  }, [walletAddress, profile?.actions.mint]);
+
+  useEffect(() => {
+    if (!walletAddress || !process.env.NEXT_PUBLIC_SWAP_CONTRACT) return;
+    const client = createPublicClient({
+      chain: baseSepolia,
+      transport: http(),
+    });
+    void checkHasSwapped(client, walletAddress).then(setHasSwapped);
+  }, [walletAddress, messages.length]);
+
+  useEffect(() => {
+    if (
+      missionBootstrapped ||
+      initialPrompt ||
+      !profile ||
+      messages.length > 0
+    ) {
+      return;
+    }
+
+    setMissionBootstrapped(true);
+    const mission = getNextMission(profile, hasMintedNft, hasSwapped);
+    addAssistant(
+      getProactiveGreeting(profile, hasMintedNft, hasSwapped, displayName),
+    );
+    if (mission) {
+      offerMission(mission, displayName ?? profile.displayName ?? undefined);
+    }
+  }, [
+    addAssistant,
+    displayName,
+    hasMintedNft,
+    hasSwapped,
+    initialPrompt,
+    messages.length,
+    missionBootstrapped,
+    offerMission,
+    profile,
+  ]);
+
   return (
     <div
-      className={`relative flex flex-col bg-[#05070d] ${embedded ? "h-full" : "h-screen"}`}
+      className={`relative flex flex-col bg-[#05070d] ${embedded ? "h-full" : "h-dvh"}`}
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-[28%] h-64 w-64 -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(245,166,35,0.14),transparent_70%)] blur-2xl" />
         <div className="absolute inset-0 opacity-[0.35] [background-image:radial-gradient(rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:28px_28px]" />
       </div>
 
-      <div className="relative z-10 shrink-0 px-4 pb-2 pt-4 sm:px-6">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-2.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-black">
+      <div className="relative z-10 shrink-0 px-3 pb-2 pt-3 sm:px-6 sm:pt-4">
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-2 sm:gap-3">
+          <div className="inline-flex min-w-0 items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1.5 sm:gap-2.5 sm:px-3">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-black">
               <SparklesIcon className="h-3.5 w-3.5" />
             </span>
-            <span className="text-left leading-tight">
-              <span className="block text-sm font-semibold text-white">
+            <span className="min-w-0 text-left leading-tight">
+              <span className="block truncate text-sm font-semibold text-white">
                 Web3 Mentor
               </span>
               <span className="block text-[11px] text-amber-300/70">AI Tutor</span>
             </span>
           </div>
 
-          <div className="min-w-[140px] rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2">
+          <div className="w-[112px] shrink-0 rounded-2xl border border-white/8 bg-white/[0.03] px-2.5 py-2 sm:w-auto sm:min-w-[140px] sm:px-3">
             <div className="flex items-center justify-between gap-2 text-[11px]">
-              <span className="font-medium text-amber-300">Level {level}</span>
+              <span className="font-medium text-amber-300">Lvl {level}</span>
               <span className="text-white/40">{xp} XP</span>
             </div>
             <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10">
@@ -554,20 +710,20 @@ export function ChatInterface({
       </div>
 
       {!hasStarted ? (
-        <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center px-4 pb-12">
-          <div className="w-full max-w-xl">
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-3 pb-8 sm:px-4 sm:pb-12">
+          <div className="w-full max-w-xl py-4">
             <div className="text-center">
-              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-500/20 to-orange-500/10 shadow-[0_0_40px_rgba(245,166,35,0.15)]">
-                <SparklesIcon className="h-7 w-7 text-amber-300" />
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-500/25 bg-gradient-to-br from-amber-500/20 to-orange-500/10 shadow-[0_0_40px_rgba(245,166,35,0.15)] sm:mb-5 sm:h-14 sm:w-14">
+                <SparklesIcon className="h-6 w-6 text-amber-300 sm:h-7 sm:w-7" />
               </div>
-              <h1 className="text-[1.75rem] font-semibold tracking-tight text-white sm:text-[2.1rem]">
+              <h1 className="text-[1.45rem] font-semibold tracking-tight text-white sm:text-[2.1rem]">
                 {displayName
                   ? `Ready to learn, ${displayName}?`
                   : "Learn Web3 by doing"}
               </h1>
-              <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-white/50">
-                Ask questions, practice with real testnet wallets, and earn
-                on-chain XP — not just another chatbot.
+              <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/50 sm:text-base">
+                The AI that teaches you Web3 by letting you use Web3 — simulate,
+                confirm in your wallet, earn XP.
               </p>
             </div>
 
@@ -576,10 +732,10 @@ export function ChatInterface({
               setInput={setInput}
               disabled={isThinking}
               onSubmit={() => void handleSend(input)}
-              className="mt-8"
+              className="mt-6 sm:mt-8"
             />
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="mt-5 grid gap-2.5 sm:mt-6 sm:grid-cols-2 sm:gap-3">
               {SUGGESTION_CARDS.map((card) => {
                 const Icon = card.icon;
                 return (
@@ -587,9 +743,9 @@ export function ChatInterface({
                     key={card.prompt}
                     type="button"
                     onClick={() => void handleSend(card.prompt)}
-                    className="group flex items-start gap-3 rounded-2xl border border-white/8 bg-[#12182b]/70 p-4 text-left transition hover:border-amber-500/35 hover:bg-amber-500/[0.07]"
+                    className="group flex items-start gap-3 rounded-2xl border border-white/8 bg-[#12182b]/70 p-3.5 text-left transition hover:border-amber-500/35 hover:bg-amber-500/[0.07] sm:p-4"
                   >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-300 transition group-hover:bg-gradient-to-br group-hover:from-amber-500 group-hover:to-orange-500 group-hover:text-black">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-300 transition group-hover:bg-gradient-to-br group-hover:from-amber-500 group-hover:to-orange-500 group-hover:text-black sm:h-10 sm:w-10">
                       <Icon className="h-4 w-4" />
                     </span>
                     <span className="min-w-0">
@@ -608,8 +764,8 @@ export function ChatInterface({
         </div>
       ) : (
         <>
-          <div className="relative z-10 flex-1 overflow-y-auto">
-            <div className="mx-auto max-w-2xl space-y-5 px-4 py-6 sm:px-6">
+          <div className="relative z-10 flex-1 overflow-y-auto overscroll-contain">
+            <div className="mx-auto max-w-2xl space-y-5 px-3 py-5 sm:px-6 sm:py-6">
               {messages.map((msg) => (
                 <MessageBubble
                   key={msg.id}
@@ -617,6 +773,10 @@ export function ChatInterface({
                   isCreatingStellar={isCreatingStellar}
                   onFund={(id, chain) => void handleFund(id, chain)}
                   onQuizAnswer={(id, i) => void handleQuizAnswer(id, i)}
+                  onWalletSimulateContinue={(id) => advanceToConfirm(id)}
+                  onWalletConfirm={(id, action) =>
+                    void confirmWalletAction(id, action)
+                  }
                 />
               ))}
 
@@ -638,7 +798,7 @@ export function ChatInterface({
             </div>
           </div>
 
-          <div className="relative z-10 shrink-0 px-4 pb-5 pt-2 sm:px-6">
+          <div className="relative z-10 shrink-0 px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:px-6 sm:pb-5">
             <div className="mx-auto max-w-2xl">
               <ChatComposer
                 input={input}
@@ -687,23 +847,26 @@ function ChatComposer({
         onSubmit();
       }}
     >
-      <div className="rounded-[28px] border border-white/10 bg-[#12182b] p-2 shadow-[0_0_0_1px_rgba(245,166,35,0.06)] focus-within:border-amber-500/40 focus-within:ring-1 focus-within:ring-amber-500/20">
+      <div className="rounded-[24px] border border-white/10 bg-[#12182b] p-2 shadow-[0_0_0_1px_rgba(245,166,35,0.06)] focus-within:border-amber-500/40 focus-within:ring-1 focus-within:ring-amber-500/20 sm:rounded-[28px]">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask anything about Web3..."
-          className="w-full bg-transparent px-4 py-3 text-[15px] text-white placeholder:text-white/35 focus:outline-none"
+          className="w-full bg-transparent px-3.5 py-2.5 text-[15px] text-white placeholder:text-white/35 focus:outline-none sm:px-4 sm:py-3"
         />
-        <div className="flex items-center justify-between gap-2 px-1.5 pb-0.5 pt-1">
-          <p className="px-2 text-[11px] text-white/25">
+        <div className="flex items-center justify-between gap-2 px-1 pb-0.5 pt-1">
+          <p className="hidden px-2 text-[11px] text-white/25 min-[420px]:block">
             Tip: try “Fund my wallet” or “Quiz me”
+          </p>
+          <p className="px-2 text-[11px] text-white/25 min-[420px]:hidden">
+            Ask or practice
           </p>
           <button
             type="submit"
             disabled={!input.trim() || disabled}
             aria-label="Send message"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-black transition hover:from-amber-400 hover:to-orange-400 disabled:opacity-35"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-black transition hover:from-amber-400 hover:to-orange-400 disabled:opacity-35"
           >
             <ArrowUpIcon className="h-4 w-4" />
           </button>
@@ -718,21 +881,25 @@ function MessageBubble({
   isCreatingStellar,
   onFund,
   onQuizAnswer,
+  onWalletSimulateContinue,
+  onWalletConfirm,
 }: {
   msg: ChatMessage;
   isCreatingStellar: boolean;
   onFund: (messageId: string, chain: AppChainId) => void;
   onQuizAnswer: (messageId: string, optionIndex: number) => void;
+  onWalletSimulateContinue: (messageId: string) => void;
+  onWalletConfirm: (messageId: string, action: MessageAction) => void;
 }) {
   return (
     <div
       className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
     >
       <div
-        className={`max-w-[90%] ${
+        className={`max-w-[92%] sm:max-w-[90%] ${
           msg.role === "user"
-            ? "rounded-3xl rounded-br-lg bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-3.5 text-[15px] font-medium text-black"
-            : "rounded-3xl rounded-bl-lg border border-white/8 bg-[#12182b]/95 px-5 py-3.5 text-[15px] leading-relaxed text-white/80"
+            ? "rounded-3xl rounded-br-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 text-[15px] font-medium text-black sm:px-5 sm:py-3.5"
+            : "rounded-3xl rounded-bl-lg border border-white/8 bg-[#12182b]/95 px-4 py-3 text-[15px] leading-relaxed text-white/80 sm:px-5 sm:py-3.5"
         }`}
       >
         {msg.role === "assistant" && (
@@ -749,6 +916,25 @@ function MessageBubble({
           </div>
         )}
         <FormattedText text={msg.content} />
+
+        {msg.action?.type === "wallet" &&
+          msg.action.preview &&
+          msg.action.status !== "success" && (
+            <MissionActionCard
+              preview={msg.action.preview}
+              phase={msg.action.phase ?? "simulate"}
+              status={msg.action.status}
+              error={msg.action.result}
+              onSimulateContinue={() => onWalletSimulateContinue(msg.id)}
+              onConfirm={() => onWalletConfirm(msg.id, msg.action!)}
+            />
+          )}
+
+        {msg.action?.type === "wallet" &&
+          msg.action.status === "success" &&
+          msg.action.reflection && (
+            <TxReflectionCard reflection={msg.action.reflection} />
+          )}
 
         {msg.action?.type === "fund" && msg.action.status !== "success" && (
           <div className="mt-3 rounded-2xl border border-amber-500/20 bg-[#0a0f1a] p-3">

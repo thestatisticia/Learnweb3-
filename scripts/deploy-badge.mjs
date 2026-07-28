@@ -1,6 +1,6 @@
 /**
- * Deploy LearnWeb3Progress to Base Sepolia
- * Usage: node scripts/deploy-progress.mjs
+ * Deploy LearnWeb3Badge to Base Sepolia
+ * Usage: node scripts/deploy-badge.mjs
  */
 import {
   createPublicClient,
@@ -37,7 +37,7 @@ if (!key) {
 }
 
 const artifact = JSON.parse(
-  readFileSync(resolve("artifacts/LearnWeb3Progress.json"), "utf8"),
+  readFileSync(resolve("artifacts/LearnWeb3Badge.json"), "utf8"),
 );
 
 const baseSepolia = defineChain({
@@ -69,7 +69,7 @@ if (balance === 0n) {
   process.exit(1);
 }
 
-console.log("Deploying LearnWeb3Progress...");
+console.log("Deploying LearnWeb3Badge...");
 const hash = await walletClient.deployContract({
   abi: artifact.abi,
   bytecode: artifact.bytecode,
@@ -77,8 +77,6 @@ const hash = await walletClient.deployContract({
 });
 
 console.log("Deploy tx:", hash);
-console.log("Explorer:", `https://sepolia.basescan.org/tx/${hash}`);
-
 const receipt = await publicClient.waitForTransactionReceipt({ hash });
 if (receipt.status !== "success" || !receipt.contractAddress) {
   console.error("Deploy failed", receipt);
@@ -90,7 +88,7 @@ console.log("Contract:", address);
 console.log("Explorer:", `https://sepolia.basescan.org/address/${address}`);
 
 writeFileSync(
-  resolve("deployments/base-sepolia-LearnWeb3Progress.json"),
+  resolve("deployments/base-sepolia-LearnWeb3Badge.json"),
   JSON.stringify(
     {
       network: "base-sepolia",
@@ -107,22 +105,13 @@ writeFileSync(
 
 const envPath = resolve(".env.local");
 let env = existsSync(envPath) ? readFileSync(envPath, "utf8") : "";
-if (env.includes("NEXT_PUBLIC_PROGRESS_CONTRACT=")) {
+if (env.includes("NEXT_PUBLIC_BADGE_CONTRACT=")) {
   env = env.replace(
-    /NEXT_PUBLIC_PROGRESS_CONTRACT=.*/g,
-    `NEXT_PUBLIC_PROGRESS_CONTRACT=${address}`,
+    /NEXT_PUBLIC_BADGE_CONTRACT=.*/g,
+    `NEXT_PUBLIC_BADGE_CONTRACT=${address}`,
   );
 } else {
-  env += `\n# LearnWeb3Progress on Base Sepolia\nNEXT_PUBLIC_PROGRESS_CONTRACT=${address}\n`;
-}
-if (env.includes("NEXT_PUBLIC_PROGRESS_CHAIN_ID=")) {
-  env = env.replace(
-    /NEXT_PUBLIC_PROGRESS_CHAIN_ID=.*/g,
-    `NEXT_PUBLIC_PROGRESS_CHAIN_ID=84532`,
-  );
-} else {
-  env += `NEXT_PUBLIC_PROGRESS_CHAIN_ID=84532\n`;
+  env += `\nNEXT_PUBLIC_BADGE_CONTRACT=${address}\n`;
 }
 writeFileSync(envPath, env);
-
 console.log("Saved to deployments/ and .env.local");

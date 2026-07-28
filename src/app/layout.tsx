@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit, Geist_Mono } from "next/font/google";
 import { AppPrivyProvider } from "@/providers/privy-provider";
 import "./globals.css";
@@ -17,6 +17,13 @@ export const metadata: Metadata = {
   title: "LearnWeb3 — Learn Web3 by Doing",
   description:
     "An AI-powered Web3 learning app. Learn blockchain through conversation and real testnet transactions on Base, Celo, and Stellar.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#05070d",
 };
 
 export default function RootLayout({

@@ -3,6 +3,10 @@ export type ChatIntent =
   | "BALANCE"
   | "LEARN"
   | "QUIZ"
+  | "SEND"
+  | "SWAP"
+  | "MINT"
+  | "MISSION"
   | "SWITCH_CHAIN"
   | "GREETING"
   | "EXPLAIN";
@@ -11,6 +15,11 @@ export function detectIntent(message: string): ChatIntent {
   const text = message.toLowerCase().trim();
 
   if (/^(hi|hello|hey|start|help)\b/.test(text)) return "GREETING";
+  if (/start mission|next mission|continue mission|my mission/.test(text))
+    return "MISSION";
+  if (/swap|swapping|trade|exchange tokens|token swap/.test(text)) return "SWAP";
+  if (/mint|nft|badge|explorer badge/.test(text)) return "MINT";
+  if (/send|transfer|pay|send eth|send test/.test(text)) return "SEND";
   if (/fund|faucet|get test|receive test|send me test|top up|get tokens/.test(text))
     return "FUND";
   if (/balance|how much do i have|check my wallet|what do i have/.test(text))

@@ -333,7 +333,7 @@ function AuthenticatedApp() {
   };
 
   return (
-    <div className="flex h-screen bg-[#05070d]">
+    <div className="flex h-dvh max-h-dvh bg-[#05070d]">
       <NamePromptModal />
       <SidePanel
         tab={tab}
@@ -348,11 +348,11 @@ function AuthenticatedApp() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-white/8 bg-[#070b16]/80 px-4 backdrop-blur-xl sm:px-6">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-white/8 bg-[#070b16]/80 px-3 backdrop-blur-xl sm:gap-3 sm:px-6">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="rounded-lg p-2 text-white/70 transition hover:bg-white/5 hover:text-white md:hidden"
+            className="shrink-0 rounded-lg p-2 text-white/70 transition hover:bg-white/5 hover:text-white md:hidden"
             aria-label="Open menu"
           >
             <MenuIcon className="h-5 w-5" />
@@ -364,7 +364,7 @@ function AuthenticatedApp() {
             </span>
           </div>
 
-          <div className="flex min-w-0 flex-1 items-center gap-3 md:justify-start">
+          <div className="min-w-0 flex-1">
             <ChainSelector
               selected={selectedChain}
               onSelect={setSelectedChain}
@@ -376,7 +376,7 @@ function AuthenticatedApp() {
           <UserMenu displayName={displayName} email={email} />
         </header>
 
-        <div className="min-h-0 flex-1 overflow-hidden">
+        <div className="min-h-0 flex-1 overflow-hidden pb-[env(safe-area-inset-bottom)]">
           {tab === "chat" && (
             <ChatInterface
               embedded
@@ -386,17 +386,17 @@ function AuthenticatedApp() {
             />
           )}
           {tab === "lectures" && (
-            <div className="h-full overflow-y-auto p-4 sm:p-6">
+            <div className="h-full overflow-y-auto overscroll-contain p-3 sm:p-6">
               <LecturesView onAskInChat={askInChat} />
             </div>
           )}
           {tab === "profile" && (
-            <div className="h-full overflow-y-auto p-4 sm:p-6">
+            <div className="h-full overflow-y-auto overscroll-contain p-3 sm:p-6">
               <ProfileView />
             </div>
           )}
           {tab === "leaderboard" && (
-            <div className="h-full overflow-y-auto p-4 sm:p-6">
+            <div className="h-full overflow-y-auto overscroll-contain p-3 sm:p-6">
               <LeaderboardView />
             </div>
           )}

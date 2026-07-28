@@ -10,6 +10,7 @@ contract LearnWeb3Progress {
     uint256 public constant SEND_XP = 100;
     uint256 public constant LESSON_XP = 75;
     uint256 public constant QUIZ_XP = 75;
+    uint256 public constant MINT_XP = 150;
 
     struct Profile {
         uint256 xp;
@@ -62,11 +63,11 @@ contract LearnWeb3Progress {
         emit Registered(user, displayName);
     }
 
-    /// @notice Relayer awards XP after a verified learning action (fund, send, lesson, quiz).
-    /// actionId: 1=fund, 2=send, 3=lesson, 4=quiz
+    /// @notice Relayer awards XP after a verified learning action.
+    /// actionId: 1=fund, 2=send, 3=lesson, 4=quiz, 5=mint
     function awardAction(address user, uint8 actionId) external onlyOwner {
         require(user != address(0), "zero user");
-        require(actionId >= 1 && actionId <= 4, "bad action");
+        require(actionId >= 1 && actionId <= 5, "bad action");
         require(!completedActions[user][actionId], "already completed");
 
         _ensureRegistered(user);
@@ -95,14 +96,14 @@ contract LearnWeb3Progress {
             uint256 actionsCompleted,
             string memory displayName,
             bool registered,
-            bool[4] memory actionStatus,
-            bool[4] memory badgeStatus
+            bool[5] memory actionStatus,
+            bool[5] memory badgeStatus
         )
     {
         Profile storage p = _profiles[user];
-        bool[4] memory actions;
-        bool[4] memory badgeArr;
-        for (uint8 i = 1; i <= 4; i++) {
+        bool[5] memory actions;
+        bool[5] memory badgeArr;
+        for (uint8 i = 1; i <= 5; i++) {
             actions[i - 1] = completedActions[user][i];
             badgeArr[i - 1] = badges[user][i];
         }
@@ -153,6 +154,7 @@ contract LearnWeb3Progress {
         if (actionId == 1) return FUND_XP;
         if (actionId == 2) return SEND_XP;
         if (actionId == 3) return LESSON_XP;
-        return QUIZ_XP;
+        if (actionId == 4) return QUIZ_XP;
+        return MINT_XP;
     }
 }

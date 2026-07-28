@@ -42,8 +42,8 @@ export function NamePromptModal() {
           Choose your learner name
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-white/55">
-          This name is linked to your wallet and saved on Ethereum Sepolia. It
-          shows on your profile and the leaderboard.
+          This name is linked to your wallet on Base Sepolia. We save it
+          on-chain for you — no gas or wallet signature needed here.
         </p>
 
         {address && (
@@ -89,7 +89,7 @@ export function NamePromptModal() {
             disabled={saving || !name.trim() || !address}
             className="w-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 py-3.5 text-sm font-semibold text-black transition hover:from-amber-400 hover:to-orange-400 disabled:opacity-40"
           >
-            {saving ? "Saving to chain…" : "Save name on-chain"}
+            {saving ? "Saving on-chain…" : "Save display name"}
           </button>
         </form>
 
